@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -27,10 +28,15 @@ export class MedicationsController {
     @CurrentUser() currentUser: Partial<User>,
     @Body() createMedicationInput: CreateMedicationDto,
   ): Promise<Medication> {
-    return this.medicationsService.create(
-      createMedicationInput,
-      currentUser.id,
-    );
+    try {
+      const medication = await this.medicationsService.create(
+        createMedicationInput,
+        currentUser.id,
+      );
+      return medication;
+    } catch (error) {
+      throw new BadRequestException(error.message);
+    }
   }
 
   @UseGuards(JwtAuthGuard)

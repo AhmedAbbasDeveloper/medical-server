@@ -21,9 +21,11 @@ export class CreateMedicationDto {
   @IsPositive()
   dosage: number;
 
-  @IsArray()
-  @ValidateNested({ each: true })
   @Type(() => Date)
+  @IsArray()
   @IsDate({ each: true })
+  @ValidateNested({ each: true })
   times: Date[];
+
+  bucket?: number;
 }

@@ -19,6 +19,9 @@ export class MedicationsService {
     { dosage, times, ...createMedicationInput }: CreateMedicationDto,
     userId: string,
   ): Promise<Medication> {
+    const bucket = await this.getNextAvailableBucket(userId);
+    createMedicationInput.bucket = bucket;
+
     const medication = await this.medicationModel.create({
       ...createMedicationInput,
       userId,
@@ -60,5 +63,23 @@ export class MedicationsService {
 
   async remove(id: string, userId: string): Promise<Medication | null> {
     return this.medicationModel.findOneAndDelete({ _id: id, userId });
+  }
+
+  private async getNextAvailableBucket(userId: string): Promise<number> {
+    const existingMedications = await this.findAllFromUser(userId);
+
+    const buckets = new Set(
+      existingMedications.map(
+        (existingMedication) => existingMedication.bucket,
+      ),
+    );
+
+    for (let i = 1; i <= 5; i++) {
+      if (!buckets.has(i)) {
+        return i;
+      }
+    }
+
+    throw new Error('All buckets are already in use.');
   }
 }

@@ -15,6 +15,9 @@ export class Medication {
   @Prop({ required: true })
   quantity: number;
 
+  @Prop({ required: true })
+  bucket: number;
+
   @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'User', required: true })
   userId: User;
 
