@@ -5,18 +5,37 @@ import { Model } from 'mongoose';
 import { CreateMedicationDto, UpdateMedicationDto } from './dto';
 import { Medication, MedicationDocument } from './medication.schema';
 
+import { DosesService } from '../doses/doses.service';
+
 @Injectable()
 export class MedicationsService {
   constructor(
     @InjectModel(Medication.name)
     private readonly medicationModel: Model<MedicationDocument>,
+    private readonly doseService: DosesService,
   ) {}
 
   async create(
-    createMedicationInput: CreateMedicationDto,
+    { dosage, times, ...createMedicationInput }: CreateMedicationDto,
     userId: string,
   ): Promise<Medication> {
-    return this.medicationModel.create({ ...createMedicationInput, userId });
+    const medication = await this.medicationModel.create({
+      ...createMedicationInput,
+      userId,
+    });
+
+    times.forEach(async (time) => {
+      await this.doseService.create(
+        {
+          time,
+          dosage,
+        },
+        medication.id,
+        userId,
+      );
+    });
+
+    return medication;
   }
 
   async findAllFromUser(userId: string): Promise<Medication[]> {

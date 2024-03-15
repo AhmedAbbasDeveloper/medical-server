@@ -5,11 +5,14 @@ import { Medication, MedicationSchema } from './medication.schema';
 import { MedicationsController } from './medications.controller';
 import { MedicationsService } from './medications.service';
 
+import { DosesModule } from '../doses/doses.module';
+
 @Module({
   imports: [
     MongooseModule.forFeature([
       { name: Medication.name, schema: MedicationSchema },
     ]),
+    DosesModule,
   ],
   controllers: [MedicationsController],
   providers: [MedicationsService],
