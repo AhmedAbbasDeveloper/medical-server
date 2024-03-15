@@ -47,4 +47,8 @@ export class DosesService {
   async findOneFromUser(id: string, userId: string): Promise<Dose> {
     return this.doseModel.findOne({ _id: id, userId });
   }
+
+  async deleteAllFromMedication(medicationId: string, userId: string) {
+    return this.doseModel.deleteMany({ medicationId, userId });
+  }
 }

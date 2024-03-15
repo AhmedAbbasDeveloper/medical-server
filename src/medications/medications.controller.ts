@@ -72,10 +72,10 @@ export class MedicationsController {
 
   @UseGuards(JwtAuthGuard)
   @Delete(':id')
-  async remove(
+  async delete(
     @CurrentUser() currentUser: Partial<User>,
     @Param('id') id: string,
   ): Promise<Medication | null> {
-    return this.medicationsService.remove(id, currentUser.id);
+    return this.medicationsService.delete(id, currentUser.id);
   }
 }

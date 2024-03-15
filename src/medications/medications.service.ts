@@ -61,7 +61,8 @@ export class MedicationsService {
     );
   }
 
-  async remove(id: string, userId: string): Promise<Medication | null> {
+  async delete(id: string, userId: string): Promise<Medication | null> {
+    await this.doseService.deleteAllFromMedication(id, userId);
     return this.medicationModel.findOneAndDelete({ _id: id, userId });
   }
 
