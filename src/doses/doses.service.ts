@@ -24,13 +24,17 @@ export class DosesService {
       await this.doseModel.find({ userId });
 
     const currentTime = new Date();
+    const currentTimeInMinutes =
+      currentTime.getHours() * 60 + currentTime.getMinutes();
 
     doses.forEach((dose) => {
-      const doseTime = new Date(dose.time);
-      let timeDifference = doseTime.getTime() - currentTime.getTime();
+      const doseTimeInMinutes =
+        dose.time.getHours() * 60 + dose.time.getMinutes();
+
+      let timeDifference = doseTimeInMinutes - currentTimeInMinutes;
 
       if (timeDifference < 0) {
-        timeDifference += 24 * 60 * 60 * 1000;
+        timeDifference += 24 * 60 * 60;
       }
 
       dose.timeDifference = timeDifference;
