@@ -9,8 +9,8 @@ import { DosesService } from './doses.service';
   imports: [
     MongooseModule.forFeature([{ name: Dose.name, schema: DoseSchema }]),
   ],
-  controllers: [DosesController],
   providers: [DosesService],
+  controllers: [DosesController],
   exports: [DosesService],
 })
 export class DosesModule {}

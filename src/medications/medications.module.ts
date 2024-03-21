@@ -14,7 +14,7 @@ import { DosesModule } from '../doses/doses.module';
     ]),
     DosesModule,
   ],
-  controllers: [MedicationsController],
   providers: [MedicationsService],
+  controllers: [MedicationsController],
 })
 export class MedicationsModule {}
