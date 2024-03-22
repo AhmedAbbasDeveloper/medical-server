@@ -17,12 +17,19 @@ export class MedicationsService {
     private readonly doseService: DosesService,
   ) {}
 
+  async findAllFromUser(userId: string): Promise<Medication[]> {
+    return this.medicationModel.find({ userId });
+  }
+
+  async findOneFromUser(id: string, userId: string): Promise<Medication> {
+    return this.medicationModel.findOne({ _id: id, userId });
+  }
+
   async create(
     { dosage, times, ...createMedicationInput }: CreateMedicationDto,
     userId: string,
   ): Promise<Medication> {
-    const bucket = await this.getNextAvailableBucket(userId);
-    createMedicationInput.bucket = bucket;
+    createMedicationInput.bucket = await this.getNextAvailableBucket(userId);
 
     const medication = await this.medicationModel.create({
       ...createMedicationInput,
@@ -43,15 +50,7 @@ export class MedicationsService {
     return medication;
   }
 
-  async findAllFromUser(userId: string): Promise<Medication[]> {
-    return this.medicationModel.find({ userId });
-  }
-
-  async findOneFromUser(id: string, userId: string): Promise<Medication> {
-    return this.medicationModel.findOne({ _id: id, userId });
-  }
-
-  async updateOne(
+  async update(
     id: string,
     { quantityAdded }: UpdateMedicationDto,
     userId: string,
@@ -105,11 +104,10 @@ export class MedicationsService {
     );
 
     await this.decrementQuantity(medication.id, dose.dosage);
-    const bucket = medication.bucket;
 
     try {
       for (let i = 0; i < dose.dosage; i++) {
-        await axios.get(`http://192.48.56.2/${bucket}`);
+        await axios.get(`http://192.48.56.2/${medication.bucket}`);
       }
       return dose;
     } catch (error) {

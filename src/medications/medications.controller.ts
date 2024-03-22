@@ -24,6 +24,23 @@ export class MedicationsController {
   constructor(private readonly medicationsService: MedicationsService) {}
 
   @UseGuards(JwtAuthGuard)
+  @Get()
+  async findAllFromUser(
+    @CurrentUser() currentUser: Partial<User>,
+  ): Promise<Medication[]> {
+    return this.medicationsService.findAllFromUser(currentUser.id);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get(':id')
+  async findOneFromUser(
+    @CurrentUser() currentUser: Partial<User>,
+    @Param('id') id: string,
+  ): Promise<Medication> {
+    return this.medicationsService.findOneFromUser(id, currentUser.id);
+  }
+
+  @UseGuards(JwtAuthGuard)
   @Post()
   async create(
     @CurrentUser() currentUser: Partial<User>,
@@ -41,30 +58,13 @@ export class MedicationsController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Get()
-  async findAll(
-    @CurrentUser() currentUser: Partial<User>,
-  ): Promise<Medication[]> {
-    return this.medicationsService.findAllFromUser(currentUser.id);
-  }
-
-  @UseGuards(JwtAuthGuard)
-  @Get(':id')
-  async findOne(
-    @CurrentUser() currentUser: Partial<User>,
-    @Param('id') id: string,
-  ): Promise<Medication> {
-    return this.medicationsService.findOneFromUser(id, currentUser.id);
-  }
-
-  @UseGuards(JwtAuthGuard)
   @Patch(':id')
   async update(
     @CurrentUser() currentUser: Partial<User>,
     @Param('id') id: string,
     @Body() updateMedicationInput: UpdateMedicationDto,
   ): Promise<Medication> {
-    return this.medicationsService.updateOne(
+    return this.medicationsService.update(
       id,
       updateMedicationInput,
       currentUser.id,

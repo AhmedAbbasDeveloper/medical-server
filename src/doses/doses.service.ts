@@ -11,14 +11,6 @@ export class DosesService {
     @InjectModel(Dose.name) private readonly doseModel: Model<DoseDocument>,
   ) {}
 
-  async create(
-    createDoseInput: CreateDoseDto,
-    medicationId: string,
-    userId: string,
-  ): Promise<Dose> {
-    return this.doseModel.create({ ...createDoseInput, medicationId, userId });
-  }
-
   async findAllFromUser(userId: string): Promise<Dose[]> {
     const doses: (Dose & { timeDifference?: number })[] =
       await this.doseModel.find({ userId });
@@ -52,7 +44,18 @@ export class DosesService {
     return this.doseModel.findOne({ _id: id, userId });
   }
 
-  async deleteAllFromMedication(medicationId: string, userId: string) {
+  async create(
+    createDoseInput: CreateDoseDto,
+    medicationId: string,
+    userId: string,
+  ): Promise<Dose> {
+    return this.doseModel.create({ ...createDoseInput, medicationId, userId });
+  }
+
+  async deleteAllFromMedication(
+    medicationId: string,
+    userId: string,
+  ): Promise<{ acknowledged: boolean; deletedCount: number }> {
     return this.doseModel.deleteMany({ medicationId, userId });
   }
 }

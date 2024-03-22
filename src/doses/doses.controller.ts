@@ -13,13 +13,15 @@ export class DosesController {
 
   @UseGuards(JwtAuthGuard)
   @Get()
-  async findAll(@CurrentUser() currentUser: Partial<User>): Promise<Dose[]> {
+  async findAllFromUser(
+    @CurrentUser() currentUser: Partial<User>,
+  ): Promise<Dose[]> {
     return this.dosesService.findAllFromUser(currentUser.id);
   }
 
   @UseGuards(JwtAuthGuard)
   @Get(':id')
-  async findOne(
+  async findOneFromUser(
     @CurrentUser() currentUser: Partial<User>,
     @Param('id') id: string,
   ): Promise<Dose> {
