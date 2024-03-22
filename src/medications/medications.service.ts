@@ -1,10 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
+import axios from 'axios';
 import { Model } from 'mongoose';
 
 import { CreateMedicationDto, UpdateMedicationDto } from './dto';
 import { Medication, MedicationDocument } from './medication.schema';
 
+import { Dose } from '../doses/dose.entity';
 import { DosesService } from '../doses/doses.service';
 
 @Injectable()
@@ -82,5 +84,36 @@ export class MedicationsService {
     }
 
     throw new Error('All buckets are already in use.');
+  }
+
+  async decrementQuantity(
+    id: string,
+    quantityConsumed: number,
+  ): Promise<Medication> {
+    return this.medicationModel.findOneAndUpdate(
+      { _id: id },
+      { $inc: { quantity: -quantityConsumed } },
+      { new: true },
+    );
+  }
+
+  async dispense(doseId: string, userId: string): Promise<Dose | null> {
+    const dose = await this.doseService.findOneFromUser(doseId, userId);
+    const medication = await this.findOneFromUser(
+      dose.medicationId.toString(),
+      userId,
+    );
+
+    await this.decrementQuantity(medication.id, dose.dosage);
+    const bucket = medication.bucket;
+
+    try {
+      for (let i = 0; i < dose.dosage; i++) {
+        await axios.get(`http://192.48.56.2/${bucket}`);
+      }
+      return dose;
+    } catch (error) {
+      console.log(error);
+    }
   }
 }

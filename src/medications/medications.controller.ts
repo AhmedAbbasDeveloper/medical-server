@@ -16,6 +16,7 @@ import { MedicationsService } from './medications.service';
 
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { CurrentUser } from '../decorators/user.decorator';
+import { Dose } from '../doses/dose.entity';
 import { User } from '../users/user.schema';
 
 @Controller('medications')
@@ -77,5 +78,14 @@ export class MedicationsController {
     @Param('id') id: string,
   ): Promise<Medication | null> {
     return this.medicationsService.delete(id, currentUser.id);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('dispense/dose/:doseId')
+  async dispsense(
+    @CurrentUser() currentUser: Partial<User>,
+    @Param('doseId') doseId: string,
+  ): Promise<Dose | null> {
+    return this.medicationsService.dispense(doseId, currentUser.id);
   }
 }
