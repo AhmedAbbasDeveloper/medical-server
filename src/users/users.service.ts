@@ -28,4 +28,8 @@ export class UsersService {
       emergencyContactInformation,
     });
   }
+
+  async updateDeviceToken(id: string, deviceToken: string): Promise<User> {
+    return this.userModel.findByIdAndUpdate(id, { deviceToken }, { new: true });
+  }
 }

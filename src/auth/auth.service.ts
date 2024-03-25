@@ -55,4 +55,10 @@ export class AuthService {
 
     return this.login(user);
   }
+
+  async updateDeviceToken(id: string, deviceToken: string): Promise<User> {
+    const user = await this.usersService.updateDeviceToken(id, deviceToken);
+    user.password = undefined;
+    return user;
+  }
 }

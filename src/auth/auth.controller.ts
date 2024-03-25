@@ -56,4 +56,13 @@ export class AuthController {
   getProfile(@CurrentUser() currentUser: Partial<User>) {
     return currentUser;
   }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('device-token')
+  async updateDeviceToken(
+    @CurrentUser() currentUser: Partial<User>,
+    @Body('deviceToken') deviceToken: string,
+  ): Promise<Partial<User>> {
+    return this.authService.updateDeviceToken(currentUser.id, deviceToken);
+  }
 }

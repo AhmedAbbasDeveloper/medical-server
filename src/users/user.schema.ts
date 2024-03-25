@@ -24,6 +24,9 @@ export class User {
   @Prop({ required: true, type: ContactInformationSchema })
   emergencyContactInformation: ContactInformation;
 
+  @Prop({ required: false })
+  deviceToken: string;
+
   createdAt: Date;
 
   updatedAt: Date;
