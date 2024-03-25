@@ -107,26 +107,18 @@ export class MedicationsService {
   async dispense(doseId: string, userId: string): Promise<Dose | null> {
     const dose = await this.doseService.findOneFromUser(doseId, userId);
     const medication = await this.findOne(dose.medicationId.toString());
-    const user = await this.usersService.findOne(userId);
-
-    await this.decrementQuantity(medication.id, dose.dosage);
-
-    if (medication.quantity < dose.dosage * 5) {
-      await this.notificationsService.sendPushNotification({
-        title: 'Low medication quantity',
-        body: `The quantity of ${medication.name} is running low. Please refill soon.`,
-        deviceToken: user.deviceToken,
-      });
-    }
 
     try {
       for (let i = 0; i < dose.dosage; i++) {
         await axios.get(`http://192.48.56.2/${medication.bucket}`);
       }
-      return dose;
     } catch (error) {
       console.log(error);
     }
+
+    await this.decrementQuantity(medication.id, dose.dosage);
+
+    return dose;
   }
 
   async notifyUser(dose: Dose): Promise<void> {
