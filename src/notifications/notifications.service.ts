@@ -8,7 +8,11 @@ export class NotificationsService {
   constructor() {
     // Initialize Firebase Admin SDK with service account credentials
     admin.initializeApp({
-      credential: admin.credential.cert('./medical-firebase-admin.json'),
+      credential: admin.credential.cert({
+        projectId: process.env.FIREBASE_PROJECT_ID,
+        clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+        privateKey: process.env.FIREBASE_PRIVATE_KEY,
+      }),
     });
 
     this.fcm = admin.messaging();
@@ -18,7 +22,7 @@ export class NotificationsService {
     try {
       // Constructing the message payload
       const message: admin.messaging.Message = {
-        data: {
+        notification: {
           // Customize payload data as needed
           title: notificationData.title,
           body: notificationData.body,

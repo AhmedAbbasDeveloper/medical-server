@@ -35,13 +35,30 @@ export class DosesService {
     doses.sort((a, b) => a.timeDifference - b.timeDifference);
 
     return doses.map((dose) => {
-      delete dose.timeDifference;
+      dose.timeDifference = undefined;
       return dose;
     });
   }
 
   async findOneFromUser(id: string, userId: string): Promise<Dose> {
     return this.doseModel.findOne({ _id: id, userId });
+  }
+
+  async findAllNow(): Promise<Dose[]> {
+    const currentTime = new Date();
+    const hour = currentTime.getHours();
+    const minute = currentTime.getMinutes();
+
+    const doses = await this.doseModel.find({
+      $expr: {
+        $and: [
+          { $eq: [{ $hour: '$time' }, hour] },
+          { $eq: [{ $minute: '$time' }, minute] },
+        ],
+      },
+    });
+
+    return doses;
   }
 
   async create(

@@ -8,6 +8,8 @@ import { Medication, MedicationDocument } from './medication.schema';
 
 import { Dose } from '../doses/dose.entity';
 import { DosesService } from '../doses/doses.service';
+import { NotificationsService } from '../notifications/notifications.service';
+import { UsersService } from '../users/users.service';
 
 @Injectable()
 export class MedicationsService {
@@ -15,10 +17,16 @@ export class MedicationsService {
     @InjectModel(Medication.name)
     private readonly medicationModel: Model<MedicationDocument>,
     private readonly doseService: DosesService,
+    private readonly notificationsService: NotificationsService,
+    private readonly usersService: UsersService,
   ) {}
 
   async findAllFromUser(userId: string): Promise<Medication[]> {
     return this.medicationModel.find({ userId });
+  }
+
+  async findOne(id: string): Promise<Medication> {
+    return this.medicationModel.findById(id);
   }
 
   async findOneFromUser(id: string, userId: string): Promise<Medication> {
@@ -98,12 +106,18 @@ export class MedicationsService {
 
   async dispense(doseId: string, userId: string): Promise<Dose | null> {
     const dose = await this.doseService.findOneFromUser(doseId, userId);
-    const medication = await this.findOneFromUser(
-      dose.medicationId.toString(),
-      userId,
-    );
+    const medication = await this.findOne(dose.medicationId.toString());
+    const user = await this.usersService.findOne(userId);
 
     await this.decrementQuantity(medication.id, dose.dosage);
+
+    if (medication.quantity < dose.dosage * 5) {
+      await this.notificationsService.sendPushNotification({
+        title: 'Low medication quantity',
+        body: `The quantity of ${medication.name} is running low. Please refill soon.`,
+        deviceToken: user.deviceToken,
+      });
+    }
 
     try {
       for (let i = 0; i < dose.dosage; i++) {
@@ -113,5 +127,16 @@ export class MedicationsService {
     } catch (error) {
       console.log(error);
     }
+  }
+
+  async notifyUser(dose: Dose): Promise<void> {
+    const medication = await this.findOne(dose.medicationId.toString());
+    const user = await this.usersService.findOne(medication.userId.toString());
+
+    await this.notificationsService.sendPushNotification({
+      title: 'Time to take your medication!',
+      body: `It's time to take your ${medication.name} dose. Please take ${dose.dosage} now.`,
+      deviceToken: user.deviceToken,
+    });
   }
 }

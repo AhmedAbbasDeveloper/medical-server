@@ -9,6 +9,7 @@ import {
   Post,
   UseGuards,
 } from '@nestjs/common';
+import { Cron } from '@nestjs/schedule';
 
 import { CreateMedicationDto, UpdateMedicationDto } from './dto';
 import { Medication } from './medication.schema';
@@ -17,11 +18,15 @@ import { MedicationsService } from './medications.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { CurrentUser } from '../decorators/user.decorator';
 import { Dose } from '../doses/dose.entity';
+import { DosesService } from '../doses/doses.service';
 import { User } from '../users/user.schema';
 
 @Controller('medications')
 export class MedicationsController {
-  constructor(private readonly medicationsService: MedicationsService) {}
+  constructor(
+    private readonly medicationsService: MedicationsService,
+    private readonly dosesService: DosesService,
+  ) {}
 
   @UseGuards(JwtAuthGuard)
   @Get()
@@ -87,5 +92,14 @@ export class MedicationsController {
     @Param('doseId') doseId: string,
   ): Promise<Dose | null> {
     return this.medicationsService.dispense(doseId, currentUser.id);
+  }
+
+  @Cron('0 * * * * *')
+  async sendNotifications(): Promise<void> {
+    const doses = await this.dosesService.findAllNow();
+
+    for (const dose of doses) {
+      await this.medicationsService.notifyUser(dose);
+    }
   }
 }
