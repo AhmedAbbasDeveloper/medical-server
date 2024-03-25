@@ -11,6 +11,10 @@ export class UsersService {
     @InjectModel(User.name) private readonly userModel: Model<UserDocument>,
   ) {}
 
+  async findOne(id: string): Promise<User | null> {
+    return this.userModel.findById(id);
+  }
+
   async findOneByEmail(email: string): Promise<User | null> {
     return this.userModel.findOne({ email });
   }
