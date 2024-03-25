@@ -2,7 +2,6 @@ import {
   BadRequestException,
   Body,
   Controller,
-  Get,
   Post,
   UseGuards,
 } from '@nestjs/common';
@@ -49,12 +48,6 @@ export class AuthController {
     } catch (error) {
       throw new BadRequestException(error.message);
     }
-  }
-
-  @UseGuards(JwtAuthGuard)
-  @Get('profile')
-  getProfile(@CurrentUser() currentUser: Partial<User>) {
-    return currentUser;
   }
 
   @UseGuards(JwtAuthGuard)
